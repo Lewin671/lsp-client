@@ -8,6 +8,16 @@ import {
     InitializedNotification,
     LogMessageNotification,
     ShowMessageNotification,
+    ShowMessageRequest,
+    PublishDiagnosticsNotification,
+    DidOpenTextDocumentNotification,
+    DidOpenTextDocumentParams,
+    DidChangeTextDocumentNotification,
+    DidChangeTextDocumentParams,
+    DidCloseTextDocumentNotification,
+    DidCloseTextDocumentParams,
+    DidSaveTextDocumentNotification,
+    DidSaveTextDocumentParams,
     MessageType,
     ClientCapabilities
 } from 'vscode-languageserver-protocol';
@@ -50,6 +60,20 @@ export class LanguageClient {
         this.connection.onNotification(ShowMessageNotification.type, (params) => {
             this.host.window.showMessage(params.type, params.message);
         });
+
+        this.connection.onRequest(ShowMessageRequest.type, async (params) => {
+            if (this.host.window.showMessageRequest) {
+                return await this.host.window.showMessageRequest(params.type, params.message, params.actions);
+            }
+            this.host.window.showMessage(params.type, params.message);
+            return null;
+        });
+
+        this.connection.onNotification(PublishDiagnosticsNotification.type, (params) => {
+            if (this.host.window.publishDiagnostics) {
+                this.host.window.publishDiagnostics(params.uri, params.diagnostics);
+            }
+        });
     }
 
     private async initialize(): Promise<InitializeResult> {
@@ -86,5 +110,27 @@ export class LanguageClient {
     // Expose connection for custom requests/notifications
     public getConnection(): MessageConnection | undefined {
         return this.connection;
+    }
+
+    public sendNotification(type: any, params: any): void {
+        if (this.connection) {
+            this.connection.sendNotification(type, params);
+        }
+    }
+
+    public didOpen(params: DidOpenTextDocumentParams): void {
+        this.sendNotification(DidOpenTextDocumentNotification.type, params);
+    }
+
+    public didChange(params: DidChangeTextDocumentParams): void {
+        this.sendNotification(DidChangeTextDocumentNotification.type, params);
+    }
+
+    public didClose(params: DidCloseTextDocumentParams): void {
+        this.sendNotification(DidCloseTextDocumentNotification.type, params);
+    }
+
+    public didSave(params: DidSaveTextDocumentParams): void {
+        this.sendNotification(DidSaveTextDocumentNotification.type, params);
     }
 }

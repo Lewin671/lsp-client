@@ -2,14 +2,24 @@ import * as path from 'path';
 import { LanguageClient } from '../common/LanguageClient';
 import { IHost, IWindow, IWorkspace, IConfiguration } from '../interfaces/IHost';
 import { StdioTransport } from '../transports/StdioTransport';
-import { MessageType } from 'vscode-languageserver-protocol';
+import { MessageType, MessageActionItem, Diagnostic } from 'vscode-languageserver-protocol';
 
 class ConsoleWindow implements IWindow {
     showMessage(type: MessageType, message: string): void {
         console.log(`[Window] ${message}`);
     }
+    async showMessageRequest(type: MessageType, message: string, actions?: MessageActionItem[]): Promise<MessageActionItem | undefined> {
+        console.log(`[Window Request] ${message}`);
+        if (actions) {
+            console.log(`[Window Request Actions] ${JSON.stringify(actions)}`);
+        }
+        return undefined;
+    }
     logMessage(type: MessageType, message: string): void {
         console.log(`[Log] ${message}`);
+    }
+    publishDiagnostics(uri: string, diagnostics: Diagnostic[]): void {
+        console.log(`[Diagnostics] ${uri}: ${JSON.stringify(diagnostics)}`);
     }
 }
 
@@ -44,6 +54,16 @@ async function main() {
         await client.start();
         console.log('Client started successfully');
         
+        // Simulate opening a document
+        client.didOpen({
+            textDocument: {
+                uri: 'file:///test.txt',
+                languageId: 'plaintext',
+                version: 1,
+                text: 'Hello World'
+            }
+        });
+
         // Keep alive for a bit to receive messages
         setTimeout(async () => {
             await client.stop();
