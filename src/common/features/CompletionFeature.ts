@@ -4,45 +4,118 @@ import {
     CompletionRequest, 
     CompletionParams, 
     CompletionList, 
-    CompletionItem 
+    CompletionItem,
+    CompletionOptions,
+    CompletionRegistrationOptions,
+    DocumentSelector,
+    CompletionItemKind,
+    CompletionItemTag,
+    InsertTextMode,
+    MarkupKind
 } from 'vscode-languageserver-protocol';
-import { Feature } from '../Feature';
+import { 
+    Feature, 
+    StaticFeature, 
+    FeatureState,
+    ensure 
+} from '../Feature';
 import { LanguageClient } from '../LanguageClient';
 
-export class CompletionFeature implements Feature {
+/**
+ * Supported completion item kinds
+ */
+const SupportedCompletionItemKinds: CompletionItemKind[] = [
+    CompletionItemKind.Text,
+    CompletionItemKind.Method,
+    CompletionItemKind.Function,
+    CompletionItemKind.Constructor,
+    CompletionItemKind.Field,
+    CompletionItemKind.Variable,
+    CompletionItemKind.Class,
+    CompletionItemKind.Interface,
+    CompletionItemKind.Module,
+    CompletionItemKind.Property,
+    CompletionItemKind.Unit,
+    CompletionItemKind.Value,
+    CompletionItemKind.Enum,
+    CompletionItemKind.Keyword,
+    CompletionItemKind.Snippet,
+    CompletionItemKind.Color,
+    CompletionItemKind.File,
+    CompletionItemKind.Reference,
+    CompletionItemKind.Folder,
+    CompletionItemKind.EnumMember,
+    CompletionItemKind.Constant,
+    CompletionItemKind.Struct,
+    CompletionItemKind.Event,
+    CompletionItemKind.Operator,
+    CompletionItemKind.TypeParameter
+];
+
+/**
+ * Completion feature - implements LSP completion capability
+ */
+export class CompletionFeature implements Feature, StaticFeature {
+    private _serverSupportsCompletion: boolean = false;
+
     constructor(private client: LanguageClient) {}
 
     fillClientCapabilities(capabilities: ClientCapabilities): void {
-        capabilities.textDocument = capabilities.textDocument || {};
-        capabilities.textDocument.completion = {
-            dynamicRegistration: false, // Not supported yet
-            completionItem: {
-                snippetSupport: true,
-                commitCharactersSupport: true,
-                documentationFormat: ['markdown', 'plaintext'],
-                deprecatedSupport: true,
-                preselectSupport: true
+        const completion = ensure(ensure(capabilities, 'textDocument')!, 'completion')!;
+        completion.dynamicRegistration = true;
+        completion.contextSupport = true;
+        completion.completionItem = {
+            snippetSupport: true,
+            commitCharactersSupport: true,
+            documentationFormat: [MarkupKind.Markdown, MarkupKind.PlainText],
+            deprecatedSupport: true,
+            preselectSupport: true,
+            tagSupport: { valueSet: [CompletionItemTag.Deprecated] },
+            insertReplaceSupport: true,
+            resolveSupport: {
+                properties: ['documentation', 'detail', 'additionalTextEdits']
             },
-            contextSupport: true
+            insertTextModeSupport: { valueSet: [InsertTextMode.asIs, InsertTextMode.adjustIndentation] },
+            labelDetailsSupport: true
+        };
+        completion.insertTextMode = InsertTextMode.adjustIndentation;
+        completion.completionItemKind = { valueSet: SupportedCompletionItemKinds };
+        completion.completionList = {
+            itemDefaults: [
+                'commitCharacters', 'editRange', 'insertTextFormat', 'insertTextMode', 'data'
+            ]
         };
     }
 
-    initialize(capabilities: ServerCapabilities): void {
+    initialize(capabilities: ServerCapabilities, documentSelector?: DocumentSelector): void {
         // Check if server supports completion
         if (capabilities.completionProvider) {
-            // In a real VS Code extension, we would register a CompletionItemProvider here.
-            // For this universal client, we just mark it as available.
+            this._serverSupportsCompletion = true;
             console.log('[CompletionFeature] Server supports completion');
         }
     }
 
-    clear(): void {
-        // Cleanup if needed
+    getState(): FeatureState {
+        return { kind: 'static' };
     }
 
+    clear(): void {
+        this._serverSupportsCompletion = false;
+    }
+
+    /**
+     * Check if completion is supported
+     */
+    get isSupported(): boolean {
+        return this._serverSupportsCompletion;
+    }
+
+    /**
+     * Provide completion items
+     */
     async provideCompletion(params: CompletionParams): Promise<CompletionItem[] | CompletionList | null> {
         const connection = this.client.getConnection();
-        if (!connection) {
+        if (!connection || !this._serverSupportsCompletion) {
             return null;
         }
         return connection.sendRequest(CompletionRequest.type, params);

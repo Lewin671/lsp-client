@@ -2,40 +2,51 @@ import {
     ClientCapabilities, 
     ServerCapabilities, 
     PublishDiagnosticsNotification,
-    PublishDiagnosticsParams
+    PublishDiagnosticsParams,
+    DocumentSelector,
+    DiagnosticTag
 } from 'vscode-languageserver-protocol';
-import { Feature } from '../Feature';
+import { 
+    Feature, 
+    StaticFeature,
+    FeatureState,
+    ensure 
+} from '../Feature';
 import { LanguageClient } from '../LanguageClient';
 
-export class DiagnosticFeature implements Feature {
+/**
+ * Diagnostic feature - handles publish diagnostics from server
+ */
+export class DiagnosticFeature implements Feature, StaticFeature {
+    private _disposable: { dispose(): void } | undefined;
+
     constructor(private client: LanguageClient) {}
 
     fillClientCapabilities(capabilities: ClientCapabilities): void {
-        capabilities.textDocument = capabilities.textDocument || {};
-        capabilities.textDocument.publishDiagnostics = {
-            relatedInformation: true,
-            tagSupport: {
-                valueSet: [1, 2] // Unnecessary and Deprecated
-            },
-            versionSupport: true,
-            codeDescriptionSupport: true,
-            dataSupport: true
+        const diagnostics = ensure(ensure(capabilities, 'textDocument')!, 'publishDiagnostics')!;
+        diagnostics.relatedInformation = true;
+        diagnostics.tagSupport = {
+            valueSet: [DiagnosticTag.Unnecessary, DiagnosticTag.Deprecated]
         };
+        diagnostics.versionSupport = true;
+        diagnostics.codeDescriptionSupport = true;
+        diagnostics.dataSupport = true;
     }
 
-    initialize(capabilities: ServerCapabilities): void {
-        const connection = this.client.getConnection();
-        if (connection) {
-            connection.onNotification(PublishDiagnosticsNotification.type, (params: PublishDiagnosticsParams) => {
-                const host = this.client.getHost();
-                if (host.window.publishDiagnostics) {
-                    host.window.publishDiagnostics(params.uri, params.diagnostics);
-                }
-            });
-        }
+    initialize(capabilities: ServerCapabilities, documentSelector?: DocumentSelector): void {
+        // Diagnostics are handled in the LanguageClient's built-in listeners
+        // We just need to ensure the capability is set up properly
+        console.log('[DiagnosticFeature] Diagnostics support initialized');
+    }
+
+    getState(): FeatureState {
+        return { kind: 'static' };
     }
 
     clear(): void {
-        // Cleanup if needed
+        if (this._disposable) {
+            this._disposable.dispose();
+            this._disposable = undefined;
+        }
     }
 }
