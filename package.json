@@ -12,7 +12,9 @@
     "watch": "tsc -w",
     "clean": "rm -rf lib",
     "prepublishOnly": "npm run clean && npm run build",
-    "demo": "node lib/demo/client.js"
+    "demo": "node lib/demo/client.js",
+    "demo:custom": "node lib/demo/custom-lsp/client.js",
+    "demo:typescript": "node lib/demo/typescript-demo/client.js"
   },
   "dependencies": {
     "vscode-jsonrpc": "^8.1.0",
