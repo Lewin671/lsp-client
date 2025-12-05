@@ -74,12 +74,6 @@ export class LanguageClient {
             this.host.window.showMessage(params.type, params.message);
             return null;
         });
-
-        this.connection.onNotification(PublishDiagnosticsNotification.type, (params) => {
-            if (this.host.window.publishDiagnostics) {
-                this.host.window.publishDiagnostics(params.uri, params.diagnostics);
-            }
-        });
     }
 
     private async initialize(): Promise<InitializeResult> {
@@ -156,5 +150,9 @@ export class LanguageClient {
 
     public didSave(params: DidSaveTextDocumentParams): void {
         this.sendNotification(DidSaveTextDocumentNotification.type, params);
+    }
+
+    public getHost(): IHost {
+        return this.host;
     }
 }

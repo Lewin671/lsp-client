@@ -34,6 +34,22 @@ connection.onInitialize((params: InitializeParams) => {
 connection.onInitialized(() => {
     connection.window.showInformationMessage('Hello from LSP Server!');
     connection.console.log('Server initialized!');
+    
+    // Send a diagnostic
+    connection.sendDiagnostics({
+        uri: 'file:///test.txt',
+        diagnostics: [
+            {
+                range: {
+                    start: { line: 0, character: 0 },
+                    end: { line: 0, character: 5 }
+                },
+                message: 'This is a test diagnostic',
+                severity: 1,
+                source: 'LSP Demo Server'
+            }
+        ]
+    });
 });
 
 connection.onCompletion(

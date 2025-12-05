@@ -1,6 +1,7 @@
 import * as path from 'path';
 import { LanguageClient } from '../common/LanguageClient';
 import { CompletionFeature } from '../common/features/CompletionFeature';
+import { DiagnosticFeature } from '../common/features/DiagnosticFeature';
 import { IHost, IWindow, IWorkspace, IConfiguration } from '../interfaces/IHost';
 import { StdioTransport } from '../transports/StdioTransport';
 import { MessageType, MessageActionItem, Diagnostic } from 'vscode-languageserver-protocol';
@@ -54,6 +55,9 @@ async function main() {
     // Register features
     const completionFeature = new CompletionFeature(client);
     client.registerFeature(completionFeature);
+    
+    const diagnosticFeature = new DiagnosticFeature(client);
+    client.registerFeature(diagnosticFeature);
 
     try {
         await client.start();
