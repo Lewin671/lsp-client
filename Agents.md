@@ -1,19 +1,13 @@
-## Restrictions
+# Universal LSP Client Architecture
 
-Agents have the following restrictions:
-1. Never create a summary of the task when you finish it.
-
-## Tech Stack - Universal LSP Client Architecture
+## Tech Stack
 
 ### Core
 - **TypeScript** - Type-safe implementation for cross-environment compatibility
-- **vscode-languageserver-protocol** (3.17.6) - LSP specification
+- **vscode-languageserver-protocol** - LSP specification
 - **vscode-jsonrpc** - JSON-RPC transport abstraction
 
-### Build & Testing
-to be defined...
-
-### Key Patterns (Inspired by vscode-languageclient)
+### Key Patterns
 - **Host Abstraction** - Abstract interfaces for Window, Workspace, and Configuration (decoupling from VS Code API)
 - **Plugin Architecture** - Pluggable feature system
 - **Middleware Pattern** - Request/response interception
@@ -27,3 +21,8 @@ to be defined...
 - **transports/** - Platform-specific transports (NodeIPC, WebSocket, Stdio)
 - **middleware/** - Feature transformation logic
 - **utils/** - Cross-platform utilities (minimatch, semver)
+
+## Restrictions
+
+Agents have the following restrictions:
+1. Never create a summary of the task when you finish it.
