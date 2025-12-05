@@ -1,9 +1,9 @@
 import * as path from 'path';
-import { LanguageClient } from '../../src/common/LanguageClient';
-import { CompletionFeature } from '../../src/common/features/CompletionFeature';
-import { DiagnosticFeature } from '../../src/common/features/DiagnosticFeature';
-import { IHost, IWindow, IWorkspace, IConfiguration } from '../../src/interfaces/IHost';
-import { StdioTransport } from '../../src/transports/StdioTransport';
+import { LanguageClient } from '../../common/LanguageClient';
+import { CompletionFeature } from '../../common/features/CompletionFeature';
+import { DiagnosticFeature } from '../../common/features/DiagnosticFeature';
+import { IHost, IWindow, IWorkspace, IConfiguration } from '../../interfaces/IHost';
+import { StdioTransport } from '../../transports/StdioTransport';
 import { MessageType, MessageActionItem, Diagnostic } from 'vscode-languageserver-protocol';
 
 class ConsoleWindow implements IWindow {
