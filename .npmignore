@@ -1,0 +1,33 @@
+# Source files
+src/
+*.ts
+!*.d.ts
+
+# Configuration and tooling
+tsconfig.json
+tsconfig.*.json
+.git/
+.gitignore
+.npmignore
+
+# Documentation and metadata
+README.md
+Agents.md
+*.md
+
+# Development
+node_modules/
+package-lock.json
+yarn.lock
+
+# IDE and OS
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.map
