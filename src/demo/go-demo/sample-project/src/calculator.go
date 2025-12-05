@@ -15,7 +15,7 @@ func NewCalculator() *Calculator {
 // Calculate performs a calculation and stores result in history
 func (c *Calculator) Calculate(a, b int, operation string) int {
 	var result int
-	
+
 	switch operation {
 	case "add":
 		result = Add(a, b)
@@ -28,7 +28,7 @@ func (c *Calculator) Calculate(a, b int, operation string) int {
 	default:
 		result = 0
 	}
-	
+
 	c.history = append(c.history, result)
 	return result
 }
