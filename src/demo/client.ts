@@ -1,5 +1,6 @@
 import * as path from 'path';
 import { LanguageClient } from '../common/LanguageClient';
+import { CompletionFeature } from '../common/features/CompletionFeature';
 import { IHost, IWindow, IWorkspace, IConfiguration } from '../interfaces/IHost';
 import { StdioTransport } from '../transports/StdioTransport';
 import { MessageType, MessageActionItem, Diagnostic } from 'vscode-languageserver-protocol';
@@ -50,6 +51,10 @@ async function main() {
     const host = new ConsoleHost();
     const client = new LanguageClient(host, transport);
 
+    // Register features
+    const completionFeature = new CompletionFeature(client);
+    client.registerFeature(completionFeature);
+
     try {
         await client.start();
         console.log('Client started successfully');
@@ -63,6 +68,14 @@ async function main() {
                 text: 'Hello World'
             }
         });
+
+        // Request completion
+        console.log('Requesting completion...');
+        const items = await completionFeature.provideCompletion({
+            textDocument: { uri: 'file:///test.txt' },
+            position: { line: 0, character: 5 }
+        });
+        console.log('Completion items:', JSON.stringify(items, null, 2));
 
         // Keep alive for a bit to receive messages
         setTimeout(async () => {

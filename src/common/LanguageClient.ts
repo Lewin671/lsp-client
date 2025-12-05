@@ -23,6 +23,7 @@ import {
 } from 'vscode-languageserver-protocol';
 import { IHost } from '../interfaces/IHost';
 import { ITransport } from '../transports/ITransport';
+import { Feature } from './Feature';
 
 export interface Middleware {
     didOpen?: (data: any, next: (data: any) => void) => void;
@@ -31,6 +32,7 @@ export interface Middleware {
 
 export class LanguageClient {
     private connection: MessageConnection | undefined;
+    private features: Feature[] = [];
 
     constructor(
         private host: IHost,
@@ -38,6 +40,10 @@ export class LanguageClient {
         private clientCapabilities: ClientCapabilities = {},
         private middleware: Middleware = {}
     ) {}
+
+    public registerFeature(feature: Feature): void {
+        this.features.push(feature);
+    }
 
     async start(): Promise<void> {
         const { reader, writer } = await this.transport.connect();
@@ -81,6 +87,10 @@ export class LanguageClient {
             throw new Error('Connection not initialized');
         }
 
+        for (const feature of this.features) {
+            feature.fillClientCapabilities(this.clientCapabilities);
+        }
+
         const params: InitializeParams = {
             processId: process.pid,
             rootUri: this.host.workspace.rootUri,
@@ -88,8 +98,19 @@ export class LanguageClient {
             workspaceFolders: null // TODO: Support workspace folders
         };
 
+        for (const feature of this.features) {
+            if (feature.fillInitializeParams) {
+                feature.fillInitializeParams(params);
+            }
+        }
+
         try {
             const result = await this.connection.sendRequest(InitializeRequest.type, params);
+            
+            for (const feature of this.features) {
+                feature.initialize(result.capabilities);
+            }
+
             await this.connection.sendNotification(InitializedNotification.type, {});
             this.host.window.logMessage(MessageType.Info, 'LSP Client initialized');
             return result;
@@ -100,6 +121,9 @@ export class LanguageClient {
     }
 
     async stop(): Promise<void> {
+        for (const feature of this.features) {
+            feature.clear();
+        }
         if (this.connection) {
             this.connection.dispose();
             this.connection = undefined;

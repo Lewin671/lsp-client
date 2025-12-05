@@ -36,4 +36,34 @@ connection.onInitialized(() => {
     connection.console.log('Server initialized!');
 });
 
+connection.onCompletion(
+    (_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
+        return [
+            {
+                label: 'TypeScript',
+                kind: CompletionItemKind.Text,
+                data: 1
+            },
+            {
+                label: 'JavaScript',
+                kind: CompletionItemKind.Text,
+                data: 2
+            }
+        ];
+    }
+);
+
+connection.onCompletionResolve(
+    (item: CompletionItem): CompletionItem => {
+        if (item.data === 1) {
+            item.detail = 'TypeScript details';
+            item.documentation = 'TypeScript documentation';
+        } else if (item.data === 2) {
+            item.detail = 'JavaScript details';
+            item.documentation = 'JavaScript documentation';
+        }
+        return item;
+    }
+);
+
 connection.listen();
