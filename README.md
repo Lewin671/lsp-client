@@ -12,7 +12,7 @@ A TypeScript SDK for building Language Server Protocol (LSP) clients that run in
 ## Installation
 
 ```bash
-npm install lsp-client
+npm install @lewin671/lsp-client
 ```
 
 ## Usage
@@ -20,7 +20,7 @@ npm install lsp-client
 ### Basic Example
 
 ```typescript
-import { LanguageClient, StdioTransport } from 'lsp-client';
+import { LanguageClient, StdioTransport } from '@lewin671/lsp-client';
 
 // 1. Create a transport (e.g., Stdio for a local server)
 const transport = new StdioTransport('path/to/server-executable', ['--stdio']);

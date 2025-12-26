@@ -24,9 +24,9 @@ import { RenameFeature } from '../../common/features/RenameFeature';
 import { DiagnosticFeature } from '../../common/features/DiagnosticFeature';
 import { IHost, IWindow, IWorkspace, IConfiguration } from '../../interfaces/IHost';
 import { StdioTransport } from '../../transports/StdioTransport';
-import { 
-    MessageType, 
-    MessageActionItem, 
+import {
+    MessageType,
+    MessageActionItem,
     Diagnostic,
     Position,
     Location,
@@ -95,8 +95,8 @@ class ConsoleWindow implements IWindow {
     private diagnosticsMap: Map<string, Diagnostic[]> = new Map();
 
     showMessage(type: MessageType, message: string): void {
-        const typeStr = type === MessageType.Error ? 'ERROR' : 
-                       type === MessageType.Warning ? 'WARNING' : 'INFO';
+        const typeStr = type === MessageType.Error ? 'ERROR' :
+            type === MessageType.Warning ? 'WARNING' : 'INFO';
         log(colors.magenta, `Window.${typeStr}`, message);
     }
 
@@ -166,7 +166,7 @@ class GoHost implements IHost {
     workspace = new GoWorkspace();
     configuration = new GoConfiguration();
 
-    dispose() {}
+    dispose() { }
 }
 
 /**
@@ -231,11 +231,11 @@ async function main() {
     const window = new ConsoleWindow();
     const host = new GoHost();
     (host as any).window = window; // Store reference for diagnostics access
-    
+
     const client = new LanguageClient(host, transport, {
         textDocument: {
             hover: { dynamicRegistration: true, contentFormat: ['markdown', 'plaintext'] },
-            completion: { 
+            completion: {
                 dynamicRegistration: true,
                 completionItem: {
                     snippetSupport: true,
@@ -244,9 +244,9 @@ async function main() {
             },
             definition: { dynamicRegistration: true, linkSupport: true },
             references: { dynamicRegistration: true },
-            documentSymbol: { 
-                dynamicRegistration: true, 
-                hierarchicalDocumentSymbolSupport: true 
+            documentSymbol: {
+                dynamicRegistration: true,
+                hierarchicalDocumentSymbolSupport: true
             },
             rename: { dynamicRegistration: true, prepareSupport: true },
             publishDiagnostics: { relatedInformation: true }
@@ -277,7 +277,7 @@ async function main() {
         logSection('Starting Language Client');
         await client.start();
         logSuccess('Language client started successfully!');
-        
+
         // Give server time to initialize
         await sleep(2000);
 
@@ -303,7 +303,7 @@ async function main() {
 
         // Keep alive briefly then stop
         await sleep(1000);
-        
+
         logInfo('Stopping language client...');
         await client.stop();
         logSuccess('Client stopped gracefully');
@@ -397,7 +397,7 @@ async function testHover(client: LanguageClient, feature: HoverFeature) {
 
     const filePath = SAMPLE_FILES.math;
     const content = readFileContent(filePath);
-    
+
     // Test hover on 'Add' function
     const addPos = findPosition(content, 'func Add');
     if (addPos) {
@@ -406,7 +406,7 @@ async function testHover(client: LanguageClient, feature: HoverFeature) {
             textDocument: { uri: toUri(filePath) },
             position: { line: addPos.line, character: addPos.character + 5 } // position on 'Add'
         });
-        
+
         if (hover) {
             logSuccess('Hover result received:');
             printHoverContent(hover);
@@ -423,7 +423,7 @@ async function testHover(client: LanguageClient, feature: HoverFeature) {
             textDocument: { uri: toUri(filePath) },
             position: { line: intPos.line, character: intPos.character + 8 }
         });
-        
+
         if (hover) {
             logSuccess('Hover on type:');
             printHoverContent(hover);
@@ -465,7 +465,7 @@ async function testCompletion(client: LanguageClient, feature: CompletionFeature
 
     const filePath = SAMPLE_FILES.calculator;
     const content = readFileContent(filePath);
-    
+
     // Find a good position for completion (after method receiver)
     const funcPos = findPosition(content, 'func (c *Calculator)');
     if (funcPos) {
@@ -474,7 +474,7 @@ async function testCompletion(client: LanguageClient, feature: CompletionFeature
             textDocument: { uri: toUri(filePath) },
             position: { line: funcPos.line + 5, character: 10 }
         });
-        
+
         if (items) {
             const completionItems = Array.isArray(items) ? items : items.items;
             logSuccess(`Received ${completionItems.length} completion item(s):`);
@@ -519,7 +519,7 @@ async function testDefinition(client: LanguageClient, feature: DefinitionFeature
 
     const filePath = SAMPLE_FILES.calculator;
     const content = readFileContent(filePath);
-    
+
     // Find usage of 'Add' function
     const addUsage = findPosition(content, 'Add(a, b');
     if (addUsage) {
@@ -528,7 +528,7 @@ async function testDefinition(client: LanguageClient, feature: DefinitionFeature
             textDocument: { uri: toUri(filePath) },
             position: { line: addUsage.line, character: addUsage.character + 1 }
         });
-        
+
         if (definition) {
             if (Array.isArray(definition)) {
                 logSuccess(`Found ${definition.length} definition(s):`);
@@ -557,7 +557,7 @@ async function testDefinition(client: LanguageClient, feature: DefinitionFeature
             textDocument: { uri: toUri(filePath2) },
             position: { line: personUsage.line, character: personUsage.character + 1 }
         });
-        
+
         if (definition) {
             logSuccess('Person type definition found');
         }
@@ -577,7 +577,7 @@ async function testReferences(client: LanguageClient, feature: ReferencesFeature
 
     const filePath = SAMPLE_FILES.math;
     const content = readFileContent(filePath);
-    
+
     // Find references to 'Add' function
     const addDef = findPosition(content, 'func Add');
     if (addDef) {
@@ -587,7 +587,7 @@ async function testReferences(client: LanguageClient, feature: ReferencesFeature
             position: { line: addDef.line, character: addDef.character + 5 },
             context: { includeDeclaration: true }
         });
-        
+
         if (references && references.length > 0) {
             logSuccess(`Found ${references.length} reference(s):`);
             references.forEach((ref: Location) => {
@@ -612,11 +612,11 @@ async function testDocumentSymbols(client: LanguageClient, feature: DocumentSymb
 
     const filePath = SAMPLE_FILES.person;
     logInfo(`Getting symbols for person.go`);
-    
+
     const symbols = await feature.getDocumentSymbols({
         textDocument: { uri: toUri(filePath) }
     });
-    
+
     if (symbols && symbols.length > 0) {
         logSuccess(`Found ${symbols.length} symbol(s):`);
         printSymbols(symbols, 0);
@@ -673,7 +673,7 @@ async function testRename(client: LanguageClient, feature: RenameFeature) {
 
     const filePath = SAMPLE_FILES.math;
     const content = readFileContent(filePath);
-    
+
     // Test prepare rename on 'Add' function
     const addDef = findPosition(content, 'func Add');
     if (addDef && feature.isPrepareSupported) {
@@ -682,7 +682,7 @@ async function testRename(client: LanguageClient, feature: RenameFeature) {
             textDocument: { uri: toUri(filePath) },
             position: { line: addDef.line, character: addDef.character + 5 }
         });
-        
+
         if (prepareResult) {
             logSuccess('Prepare rename result:');
             if ('placeholder' in prepareResult) {
@@ -703,7 +703,7 @@ async function testRename(client: LanguageClient, feature: RenameFeature) {
             position: { line: addDef.line, character: addDef.character + 5 },
             newName: 'AddNumbers'
         });
-        
+
         if (workspaceEdit) {
             logSuccess('Rename would affect:');
             printWorkspaceEdit(workspaceEdit);
@@ -721,7 +721,7 @@ async function testDiagnostics(client: LanguageClient, feature: DiagnosticFeatur
 
     const filePath = SAMPLE_FILES.testDiagnostics;
     logInfo(`Opening file with errors: test_diagnostics.go`);
-    
+
     const content = readFileContent(filePath);
     client.didOpen({
         textDocument: {
@@ -741,8 +741,8 @@ async function testDiagnostics(client: LanguageClient, feature: DiagnosticFeatur
     if (diagnostics && diagnostics.length > 0) {
         logSuccess(`Found ${diagnostics.length} diagnostic(s):`);
         diagnostics.forEach((diag: Diagnostic, index: number) => {
-            const severity = diag.severity === 1 ? 'Error' : 
-                           diag.severity === 2 ? 'Warning' : 'Info';
+            const severity = diag.severity === 1 ? 'Error' :
+                diag.severity === 2 ? 'Warning' : 'Info';
             console.log(`    ${index + 1}. [${severity}] Line ${diag.range.start.line + 1}, Col ${diag.range.start.character + 1}`);
             console.log(`       ${diag.message}`);
             if (diag.code) {
