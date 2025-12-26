@@ -1,6 +1,6 @@
 {
   "name": "@lewin671/lsp-client",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Universal LSP Client SDK for TypeScript",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
