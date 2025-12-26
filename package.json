@@ -1,6 +1,6 @@
 {
   "name": "@lewin671/lsp-client",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Universal LSP Client SDK for TypeScript",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -28,7 +28,7 @@
     "watch": "tsc -w",
     "clean": "rm -rf lib",
     "prepublishOnly": "npm run clean && npm run build",
-    "publish": "npm publish --access public",
+    "release": "npm publish --access public",
     "demo": "node lib/demo/go-demo/client.js",
     "demo:custom": "node lib/demo/custom-lsp/client.js",
     "demo:typescript": "node lib/demo/typescript-demo/client.js",
